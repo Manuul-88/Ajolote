@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -37,4 +38,5 @@ public class PlayerController : NetworkBehaviour
             Time.deltaTime,
             Space.World);
     }
+
 }

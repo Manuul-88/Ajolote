@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 3066423224571764318}
   - component: {fileID: 7136272584580956948}
   - component: {fileID: -5063815887242253630}
-  - component: {fileID: 8853012721238098535}
+  - component: {fileID: 6056150056357953189}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -235,7 +235,7 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &8853012721238098535
+--- !u!114 &6056150056357953189
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -244,7 +244,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 5703462861934897429}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67cdfc83289891f4fbbf97a0edc47114, type: 3}
+  m_Script: {fileID: 11500000, guid: fe5970a523d31d148abf964662a5fe1b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  ShowTopMostFoldoutHeaderGroup: 1
+  m_EditorClassIdentifier: Assembly-CSharp::TargetGroupAutoRegister
