@@ -1,10 +1,12 @@
 using UnityEngine;
+using Unity.Netcode; // <-- Necesario para la red
 
-public class TargetGroupAutoRegister : MonoBehaviour
+public class TargetGroupAutoRegister : NetworkBehaviour // <-- Cambiamos MonoBehaviour por NetworkBehaviour
 {
     private MultiplayerTargetGroupManager manager;
 
-    void Start()
+    // Usamos OnNetworkSpawn en lugar de Start
+    public override void OnNetworkSpawn()
     {
         manager = FindFirstObjectByType<MultiplayerTargetGroupManager>();
 
@@ -14,7 +16,8 @@ public class TargetGroupAutoRegister : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    // Usamos OnNetworkDespawn en lugar de OnDestroy
+    public override void OnNetworkDespawn()
     {
         if (manager != null)
         {
