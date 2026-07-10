@@ -7,44 +7,47 @@ public class AxolotlController : NetworkBehaviour
     [Header("References")]
     public Rigidbody rootRigidbody;
 
-    [Header("Movement Settings")]
-    public float walkForce = 1500f;
+    [Header("Movement")]
+    public float moveForce = 40f;
     public float maxSpeed = 5f;
-    public float jumpForce = 1000f; // Subimos la fuerza del salto
+    public float jumpImpulse = 6f;
+    public float airControl = 0.35f; 
 
-    [Header("Balance Settings")]
-    public float uprightTorque = 25000f; // ¡Mucha más fuerza abdominal para levantarse!
-    public float groundCheckDistance = 1.2f; // Ajusta esto según el tamaño de tu cápsula
+    [Header("Balance (PD Controller)")]
+    public float uprightSpring = 3500f; 
+    public float uprightDamper = 250f;  
+    public float maxAngularVelocity = 10f;
+
+    [Header("Ground Check")]
+    public float groundCheckDistance = 0.9f;
+    public float groundCheckRadius = 0.35f;
+    public LayerMask groundMask = ~0;
 
     private bool isGrounded;
+    private Vector2 moveInput;
 
     void Awake()
     {
         if (rootRigidbody != null)
-        {
-            // Le damos libertad para girar rápido y enderezarse
-            rootRigidbody.maxAngularVelocity = 40f;
-        }
+            rootRigidbody.maxAngularVelocity = maxAngularVelocity;
     }
 
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && rootRigidbody != null)
-        {
             rootRigidbody.isKinematic = true;
-        }
     }
 
     void Update()
     {
         if (!IsOwner || rootRigidbody == null) return;
 
-        CheckGround(); // Revisamos si tocamos el piso con el nuevo método
+        CheckGround();
+        ReadMoveInput();
 
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
         {
-            rootRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isGrounded = false;
+            rootRigidbody.AddForce(Vector3.up * jumpImpulse, ForceMode.VelocityChange);
         }
     }
 
@@ -58,47 +61,62 @@ public class AxolotlController : NetworkBehaviour
 
     private void CheckGround()
     {
-        // Tira un rayo invisible desde la pelvis hacia abajo. Si choca, estamos en el piso.
-        isGrounded = Physics.Raycast(rootRigidbody.position, Vector3.down, groundCheckDistance);
+        isGrounded = Physics.SphereCast(
+            rootRigidbody.position + Vector3.up * 0.1f,
+            groundCheckRadius,
+            Vector3.down,
+            out _,
+            groundCheckDistance,
+            groundMask,
+            QueryTriggerInteraction.Ignore);
+    }
+
+    private void ReadMoveInput()
+    {
+        if (Keyboard.current == null) { moveInput = Vector2.zero; return; }
+
+        float x = 0f, z = 0f;
+        if (Keyboard.current.wKey.isPressed) z += 1f;
+        if (Keyboard.current.sKey.isPressed) z -= 1f;
+        if (Keyboard.current.dKey.isPressed) x += 1f;
+        if (Keyboard.current.aKey.isPressed) x -= 1f;
+        moveInput = new Vector2(x, z).normalized;
     }
 
     private void KeepUpright()
     {
-        Quaternion currentRotation = rootRigidbody.transform.rotation;
-        Quaternion targetRotation = Quaternion.FromToRotation(rootRigidbody.transform.up, Vector3.up) * currentRotation;
+        Quaternion current = rootRigidbody.transform.rotation;
+        Quaternion toUpright = Quaternion.FromToRotation(rootRigidbody.transform.up, Vector3.up) * current;
 
-        Vector3 axis;
-        float angle;
-        targetRotation.ToAngleAxis(out angle, out axis);
-
+        toUpright.ToAngleAxis(out float angle, out Vector3 axis);
         if (angle > 180f) angle -= 360f;
-        if (angle != 0)
+
+        if (Mathf.Abs(angle) > 0.01f)
         {
-            Vector3 torque = axis.normalized * (angle * Mathf.Deg2Rad * uprightTorque);
-            rootRigidbody.AddTorque(torque - rootRigidbody.angularVelocity, ForceMode.Acceleration);
+            Vector3 torque = axis.normalized * (angle * Mathf.Deg2Rad * uprightSpring);
+            Vector3 damping = rootRigidbody.angularVelocity * uprightDamper;
+            rootRigidbody.AddTorque(torque - damping, ForceMode.Acceleration);
         }
     }
 
     private void MovePlayer()
     {
-        if (Keyboard.current == null) return;
+        if (moveInput.sqrMagnitude < 0.01f) return;
 
-        float moveX = 0f;
-        float moveZ = 0f;
+        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
+        Vector3 flatVelocity = new Vector3(rootRigidbody.linearVelocity.x, 0f, rootRigidbody.linearVelocity.z);
+        float control = isGrounded ? 1f : airControl;
 
-        if (Keyboard.current.wKey.isPressed) moveZ += 1f;
-        if (Keyboard.current.sKey.isPressed) moveZ -= 1f;
-        if (Keyboard.current.dKey.isPressed) moveX += 1f;
-        if (Keyboard.current.aKey.isPressed) moveX -= 1f;
-
-        Vector3 moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
-
-        if (moveDirection.magnitude >= 0.1f && rootRigidbody.linearVelocity.magnitude < maxSpeed)
+        if (flatVelocity.magnitude < maxSpeed)
         {
-            rootRigidbody.AddForce(moveDirection * walkForce * Time.fixedDeltaTime, ForceMode.VelocityChange);
-
-            Quaternion lookRotation = Quaternion.LookRotation(moveDirection);
-            rootRigidbody.transform.rotation = Quaternion.Slerp(rootRigidbody.transform.rotation, lookRotation, Time.fixedDeltaTime * 10f);
+            rootRigidbody.AddForce(moveDirection * moveForce * control, ForceMode.Force);
         }
+
+        Quaternion targetYaw = Quaternion.LookRotation(moveDirection);
+        Quaternion currentYaw = Quaternion.Euler(0f, rootRigidbody.transform.eulerAngles.y, 0f);
+        float yawError = Mathf.DeltaAngle(currentYaw.eulerAngles.y, targetYaw.eulerAngles.y);
+
+        float yawTorque = yawError * Mathf.Deg2Rad * (uprightSpring * 0.2f) - rootRigidbody.angularVelocity.y * (uprightDamper * 0.2f);
+        rootRigidbody.AddTorque(Vector3.up * yawTorque, ForceMode.Acceleration);
     }
 }

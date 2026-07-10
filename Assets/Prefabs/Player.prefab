@@ -1555,11 +1555,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AxolotlController
   ShowTopMostFoldoutHeaderGroup: 1
   rootRigidbody: {fileID: 3822911617988742425}
-  walkForce: 2500
-  maxSpeed: 5
-  jumpForce: 100
-  uprightTorque: 30000
-  groundCheckDistance: 10
+  moveForce: 100
+  maxSpeed: 50
+  jumpImpulse: 20
+  airControl: 0.35
+  uprightSpring: 3500
+  uprightDamper: 250
+  maxAngularVelocity: 10
+  groundCheckDistance: 0.9
+  groundCheckRadius: 0.35
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &175276578081619002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1575,8 +1582,15 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   leftArmJoint: {fileID: 4254367114880931032}
   rightArmJoint: {fileID: 4054677235073173232}
+  leftHandRigidbody: {fileID: 4423327369442823852}
+  rightHandRigidbody: {fileID: 9130421552806482515}
+  grabRadius: 0.35
+  grabbableMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   relaxedSpring: 10
   tenseSpring: 2000
+  springLerpSpeed: 20
 --- !u!1 &6489618997741551054
 GameObject:
   m_ObjectHideFlags: 0
@@ -2195,7 +2209,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 4
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 4
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2287,14 +2301,14 @@ ConfigurableJoint:
   m_RotationDriveMode: 0
   m_AngularXDrive:
     serializedVersion: 4
-    positionSpring: 5000
-    positionDamper: 800
+    positionSpring: 3000
+    positionDamper: 300
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_AngularYZDrive:
     serializedVersion: 4
-    positionSpring: 500
-    positionDamper: 800
+    positionSpring: 3000
+    positionDamper: 300
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_SlerpDrive:
