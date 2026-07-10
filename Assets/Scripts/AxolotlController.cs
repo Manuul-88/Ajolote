@@ -6,24 +6,34 @@ public class AxolotlController : NetworkBehaviour
 {
     [Header("References")]
     public Rigidbody rootRigidbody;
+    public Rigidbody bodyRigidbody; // el Rigidbody del objeto "Body"
 
     [Header("Movement")]
-    public float moveForce = 40f;
+    public float moveForce = 30f;
     public float maxSpeed = 5f;
     public float jumpImpulse = 6f;
-    public float airControl = 0.35f; 
+    public float airControl = 0.35f;
 
-    [Header("Balance (PD Controller)")]
-    public float uprightSpring = 3500f; 
-    public float uprightDamper = 250f;  
-    public float maxAngularVelocity = 10f;
+    [Header("Balance - Rotación (endereza el cuerpo)")]
+    public float uprightSpring = 5000f;
+    public float uprightDamper = 400f;
+    public float maxAngularVelocity = 8f;
+
+    [Header("Balance - Altura (suspensión vertical, estilo Gang Beasts)")]
+    [Tooltip("Altura a la que la pelvis intenta 'flotar' sobre el piso detectado")]
+    public float balanceHeight = 1.0f;
+    [Tooltip("Fuerza del resorte vertical. Más alto = más rígido / menos se hunde")]
+    public float balanceStrength = 800f;
+    [Tooltip("Amortiguación del resorte vertical. Evita que rebote como un yoyo")]
+    public float balanceDamper = 80f;
 
     [Header("Ground Check")]
-    public float groundCheckDistance = 0.9f;
+    public float groundCheckDistance = 1.3f; // debe ser > balanceHeight
     public float groundCheckRadius = 0.35f;
     public LayerMask groundMask = ~0;
 
     private bool isGrounded;
+    private float currentGroundDistance;
     private Vector2 moveInput;
 
     void Awake()
@@ -56,6 +66,7 @@ public class AxolotlController : NetworkBehaviour
         if (!IsOwner || rootRigidbody == null) return;
 
         KeepUpright();
+        MaintainBalanceHeight();
         MovePlayer();
     }
 
@@ -65,24 +76,16 @@ public class AxolotlController : NetworkBehaviour
             rootRigidbody.position + Vector3.up * 0.1f,
             groundCheckRadius,
             Vector3.down,
-            out _,
+            out RaycastHit hit,
             groundCheckDistance,
             groundMask,
             QueryTriggerInteraction.Ignore);
+
+        currentGroundDistance = isGrounded ? hit.distance + 0.1f : -1f;
     }
 
-    private void ReadMoveInput()
-    {
-        if (Keyboard.current == null) { moveInput = Vector2.zero; return; }
-
-        float x = 0f, z = 0f;
-        if (Keyboard.current.wKey.isPressed) z += 1f;
-        if (Keyboard.current.sKey.isPressed) z -= 1f;
-        if (Keyboard.current.dKey.isPressed) x += 1f;
-        if (Keyboard.current.aKey.isPressed) x -= 1f;
-        moveInput = new Vector2(x, z).normalized;
-    }
-
+    // Corrige solo inclinación (pitch/roll), nunca yaw, así nunca compite
+    // con el giro hacia donde caminás.
     private void KeepUpright()
     {
         Quaternion current = rootRigidbody.transform.rotation;
@@ -99,6 +102,32 @@ public class AxolotlController : NetworkBehaviour
         }
     }
 
+    // "Suspensión" vertical: empuja hacia arriba con fuerza proporcional a
+    // qué tan por debajo de balanceHeight está la pelvis. Esto es lo que
+    // evita que el ragdoll colapse al primer tropezón, sin volverlo rígido.
+    private void MaintainBalanceHeight()
+    {
+        if (!isGrounded) return;
+
+        float heightError = balanceHeight - currentGroundDistance;
+        float springForce = heightError * balanceStrength;
+        float dampingForce = rootRigidbody.linearVelocity.y * balanceDamper;
+
+        rootRigidbody.AddForce(Vector3.up * (springForce - dampingForce), ForceMode.Force);
+    }
+
+    private void ReadMoveInput()
+    {
+        if (Keyboard.current == null) { moveInput = Vector2.zero; return; }
+
+        float x = 0f, z = 0f;
+        if (Keyboard.current.wKey.isPressed) z += 1f;
+        if (Keyboard.current.sKey.isPressed) z -= 1f;
+        if (Keyboard.current.dKey.isPressed) x += 1f;
+        if (Keyboard.current.aKey.isPressed) x -= 1f;
+        moveInput = new Vector2(x, z).normalized;
+    }
+
     private void MovePlayer()
     {
         if (moveInput.sqrMagnitude < 0.01f) return;
@@ -109,14 +138,17 @@ public class AxolotlController : NetworkBehaviour
 
         if (flatVelocity.magnitude < maxSpeed)
         {
-            rootRigidbody.AddForce(moveDirection * moveForce * control, ForceMode.Force);
+            // Repartir el empuje entre Root y Body evita que la parte baja
+            // arranque antes que la de arriba y el ragdoll se vaya de boca.
+            Vector3 push = moveDirection * moveForce * control;
+            rootRigidbody.AddForce(push * 0.6f, ForceMode.Force);
+            if (bodyRigidbody != null)
+                bodyRigidbody.AddForce(push * 0.4f, ForceMode.Force);
         }
 
         Quaternion targetYaw = Quaternion.LookRotation(moveDirection);
-        Quaternion currentYaw = Quaternion.Euler(0f, rootRigidbody.transform.eulerAngles.y, 0f);
-        float yawError = Mathf.DeltaAngle(currentYaw.eulerAngles.y, targetYaw.eulerAngles.y);
-
-        float yawTorque = yawError * Mathf.Deg2Rad * (uprightSpring * 0.2f) - rootRigidbody.angularVelocity.y * (uprightDamper * 0.2f);
+        float yawError = Mathf.DeltaAngle(rootRigidbody.transform.eulerAngles.y, targetYaw.eulerAngles.y);
+        float yawTorque = yawError * Mathf.Deg2Rad * (uprightSpring * 0.15f) - rootRigidbody.angularVelocity.y * (uprightDamper * 0.15f);
         rootRigidbody.AddTorque(Vector3.up * yawTorque, ForceMode.Acceleration);
     }
 }

@@ -11,8 +11,8 @@ public class AxolotlHands : NetworkBehaviour
     [Header("Manos (para detectar y sujetar objetos)")]
     public Rigidbody leftHandRigidbody;
     public Rigidbody rightHandRigidbody;
-    public float grabRadius = 0.35f;
-    public LayerMask grabbableMask = ~0;
+    public float grabRadius = 0.6f;
+    public LayerMask grabbableMask = ~0; // Everything por defecto
 
     [Header("Fuerza de agarre")]
     public float relaxedSpring = 800f;
@@ -23,6 +23,20 @@ public class AxolotlHands : NetworkBehaviour
     private FixedJoint rightGrabJoint;
     private float leftCurrentSpring, rightCurrentSpring;
 
+    void Awake()
+    {
+        // Diagnóstico: si estos campos quedan sin asignar en el Inspector,
+        // el agarre nunca va a funcionar aunque el resto esté bien.
+        if (leftHandRigidbody == null)
+            Debug.LogWarning($"[AxolotlHands] {name}: leftHandRigidbody no está asignado en el Inspector.");
+        if (rightHandRigidbody == null)
+            Debug.LogWarning($"[AxolotlHands] {name}: rightHandRigidbody no está asignado en el Inspector.");
+        if (leftArmJoint == null)
+            Debug.LogWarning($"[AxolotlHands] {name}: leftArmJoint no está asignado en el Inspector.");
+        if (rightArmJoint == null)
+            Debug.LogWarning($"[AxolotlHands] {name}: rightArmJoint no está asignado en el Inspector.");
+    }
+
     void Start()
     {
         leftCurrentSpring = relaxedSpring;
@@ -31,7 +45,12 @@ public class AxolotlHands : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner || Mouse.current == null) return;
+        if (!IsOwner) return;
+        if (Mouse.current == null)
+        {
+            Debug.LogWarning("[AxolotlHands] Mouse.current es null: revisa Project Settings > Input System Package y que exista un dispositivo de mouse.");
+            return;
+        }
 
         if (Mouse.current.leftButton.wasPressedThisFrame) TryGrab(true);
         else if (Mouse.current.leftButton.wasReleasedThisFrame) ReleaseGrab(true);
@@ -42,7 +61,6 @@ public class AxolotlHands : NetworkBehaviour
 
     void FixedUpdate()
     {
-        
         leftCurrentSpring = Mathf.Lerp(leftCurrentSpring, leftGrabJoint != null ? tenseSpring : relaxedSpring, springLerpSpeed * Time.fixedDeltaTime);
         rightCurrentSpring = Mathf.Lerp(rightCurrentSpring, rightGrabJoint != null ? tenseSpring : relaxedSpring, springLerpSpeed * Time.fixedDeltaTime);
 
@@ -53,7 +71,11 @@ public class AxolotlHands : NetworkBehaviour
     private void TryGrab(bool isLeft)
     {
         Rigidbody hand = isLeft ? leftHandRigidbody : rightHandRigidbody;
-        if (hand == null) return;
+        if (hand == null)
+        {
+            Debug.LogWarning($"[AxolotlHands] No se puede agarrar: {(isLeft ? "leftHandRigidbody" : "rightHandRigidbody")} no está asignado.");
+            return;
+        }
 
         Collider[] hits = Physics.OverlapSphere(hand.position, grabRadius, grabbableMask, QueryTriggerInteraction.Ignore);
         Rigidbody target = null;
@@ -63,7 +85,7 @@ public class AxolotlHands : NetworkBehaviour
         {
             if (hit.attachedRigidbody == null) continue;
             if (hit.attachedRigidbody == hand) continue;
-            if (hit.attachedRigidbody.transform.root == transform.root) continue; 
+            if (hit.attachedRigidbody.transform.root == transform.root) continue; // no te agarrás a vos mismo
 
             float dist = Vector3.Distance(hand.position, hit.attachedRigidbody.position);
             if (dist < closest) { closest = dist; target = hit.attachedRigidbody; }
@@ -76,8 +98,7 @@ public class AxolotlHands : NetworkBehaviour
             joint.breakForce = 8000f;
             joint.breakTorque = 8000f;
 
-            if (isLeft) leftGrabJoint = joint;
-            else rightGrabJoint = joint;
+            if (isLeft) leftGrabJoint = joint; else rightGrabJoint = joint;
         }
     }
 

@@ -1528,7 +1528,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1397350489
+  GlobalObjectIdHash: 3687827341
   InScenePlacedSourceGlobalObjectIdHash: 3074139942
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1554,15 +1554,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AxolotlController
   ShowTopMostFoldoutHeaderGroup: 1
-  rootRigidbody: {fileID: 3822911617988742425}
-  moveForce: 100
-  maxSpeed: 50
-  jumpImpulse: 20
+  rootRigidbody: {fileID: 0}
+  bodyRigidbody: {fileID: 0}
+  moveForce: 30
+  maxSpeed: 5
+  jumpImpulse: 6
   airControl: 0.35
-  uprightSpring: 3500
-  uprightDamper: 250
-  maxAngularVelocity: 10
-  groundCheckDistance: 0.9
+  uprightSpring: 5000
+  uprightDamper: 400
+  maxAngularVelocity: 8
+  balanceHeight: 1
+  balanceStrength: 800
+  balanceDamper: 80
+  groundCheckDistance: 1.3
   groundCheckRadius: 0.35
   groundMask:
     serializedVersion: 2
@@ -1584,12 +1588,12 @@ MonoBehaviour:
   rightArmJoint: {fileID: 4054677235073173232}
   leftHandRigidbody: {fileID: 4423327369442823852}
   rightHandRigidbody: {fileID: 9130421552806482515}
-  grabRadius: 0.35
+  grabRadius: 0.6
   grabbableMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  relaxedSpring: 10
-  tenseSpring: 2000
+  relaxedSpring: 800
+  tenseSpring: 5000
   springLerpSpeed: 20
 --- !u!1 &6489618997741551054
 GameObject:
