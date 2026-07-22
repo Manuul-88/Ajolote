@@ -47,8 +47,8 @@ GameObject:
   - component: {fileID: 7308272361372862950}
   - component: {fileID: 973742572033113448}
   - component: {fileID: -3482614532652865877}
-  - component: {fileID: 8345667466494730668}
   - component: {fileID: 7555644204485563475}
+  - component: {fileID: 3968016112843357821}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -325,20 +325,6 @@ MonoBehaviour:
   - {fileID: 5721627794342598184}
   - {fileID: 2543827600356155591}
   - {fileID: 6412565674644411669}
---- !u!114 &8345667466494730668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5703462861934897429}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f9114a9e19d6444896ef9248af7450c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayer
-  rigidbody3D: {fileID: 6346166692429542095}
-  mainJoint: {fileID: 973742572033113448}
 --- !u!114 &7555644204485563475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -358,6 +344,8 @@ MonoBehaviour:
   maxSpeed: 5
   jumpImpulse: 6
   airControl: 0.35
+  mainJoint: {fileID: 973742572033113448}
+  turnSpeed: 300
   uprightSpring: 5000
   uprightDamper: 400
   maxAngularVelocity: 8
@@ -369,6 +357,32 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &3968016112843357821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5703462861934897429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2254a37f823840349aad9b39b7f3ca9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AxolotlHands
+  ShowTopMostFoldoutHeaderGroup: 1
+  leftArmRigidbody: {fileID: 7469105991558098484}
+  rightArmRigidbody: {fileID: 3079537239393317552}
+  leftHandPoint: {fileID: 5899971640711368210}
+  rightHandPoint: {fileID: 1326627777586373657}
+  leftArmJoint: {fileID: 2176105005732923399}
+  rightArmJoint: {fileID: 2706138021984213364}
+  grabRadius: 0.4
+  grabbableMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  relaxedSpring: 800
+  tenseSpring: 5000
+  springLerpSpeed: 20
 --- !u!1001 &854712120126233553
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -782,6 +796,11 @@ ConfigurableJoint:
 --- !u!4 &888956630402939962 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a28ade2dcd307f749a36aeecc2f44507, type: 3}
+  m_PrefabInstance: {fileID: 854712120126233553}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1326627777586373657 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: a28ade2dcd307f749a36aeecc2f44507, type: 3}
   m_PrefabInstance: {fileID: 854712120126233553}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2331048052544524796 stripped
@@ -1412,6 +1431,11 @@ CapsuleCollider:
   m_Height: 0.56467694
   m_Direction: 1
   m_Center: {x: 1.5142561e-10, y: 0.19233933, z: 7.754846e-10}
+--- !u!4 &5899971640711368210 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6502182839619065283, guid: a28ade2dcd307f749a36aeecc2f44507, type: 3}
+  m_PrefabInstance: {fileID: 854712120126233553}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6842739032268959578 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -3086436065929644917, guid: a28ade2dcd307f749a36aeecc2f44507, type: 3}
