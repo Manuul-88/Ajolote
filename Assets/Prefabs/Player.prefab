@@ -47,6 +47,8 @@ GameObject:
   - component: {fileID: 7308272361372862950}
   - component: {fileID: 973742572033113448}
   - component: {fileID: -3482614532652865877}
+  - component: {fileID: 8345667466494730668}
+  - component: {fileID: 7555644204485563475}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -78,7 +80,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5703462861934897429}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
@@ -103,7 +105,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5703462861934897429}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
   m_Name: 
@@ -149,7 +151,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5703462861934897429}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe5970a523d31d148abf964662a5fe1b, type: 3}
   m_Name: 
@@ -323,6 +325,50 @@ MonoBehaviour:
   - {fileID: 5721627794342598184}
   - {fileID: 2543827600356155591}
   - {fileID: 6412565674644411669}
+--- !u!114 &8345667466494730668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5703462861934897429}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f9114a9e19d6444896ef9248af7450c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayer
+  rigidbody3D: {fileID: 6346166692429542095}
+  mainJoint: {fileID: 973742572033113448}
+--- !u!114 &7555644204485563475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5703462861934897429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a4d532315f5e2d43a20f8ba32a15a4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AxolotlController
+  ShowTopMostFoldoutHeaderGroup: 1
+  rootRigidbody: {fileID: 6346166692429542095}
+  bodyRigidbody: {fileID: 6346166692429542095}
+  moveForce: 30
+  maxSpeed: 5
+  jumpImpulse: 6
+  airControl: 0.35
+  uprightSpring: 5000
+  uprightDamper: 400
+  maxAngularVelocity: 8
+  balanceHeight: 1
+  balanceStrength: 800
+  balanceDamper: 80
+  groundCheckDistance: 1.3
+  groundCheckRadius: 0.35
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &854712120126233553
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -69,9 +69,9 @@ public class NetworkPlayer : MonoBehaviour
 
             Vector3 localVelocity = transform.forward * Vector3.Dot(transform.forward, rigidbody3D.linearVelocity);
 
-            float localForwardVelocity = localVelocifyVsForward.magnitude;
+            float localForwardVelocity = localVelocity.magnitude;
 
-            if (localForwardVelocity < maxSpeed)
+            if (localForwardVelocity < moveSpeed)
             {
                 rigidbody3D.AddForce(transform.forward * inputMagnitude * 30);
             }
