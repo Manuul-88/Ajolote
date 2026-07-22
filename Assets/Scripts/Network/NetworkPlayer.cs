@@ -60,7 +60,7 @@ public class NetworkPlayer : MonoBehaviour
 
         float inputMagnitude = moveInputVector.magnitude;
 
-        if(inputMagnitude > 0.1f)
+        if (inputMagnitude > 0.1f)
         {
             Quaternion desiredDirection = Quaternion.LookRotation(new Vector3(moveInputVector.x, 0, moveInputVector.y * -1), transform.up);
 
@@ -70,9 +70,16 @@ public class NetworkPlayer : MonoBehaviour
             Vector3 localVelocity = transform.forward * Vector3.Dot(transform.forward, rigidbody3D.linearVelocity);
 
             float localForwardVelocity = localVelocifyVsForward.magnitude;
+
+            if (localForwardVelocity < maxSpeed)
+            {
+                rigidbody3D.AddForce(transform.forward * inputMagnitude * 30);
+            }
         }
-
-
+        if(isGrounded && isJumpButtonPressed)
+        {
+            rigidbody3D.AddForce(Vector3.up * 20, ForceMode.Impulse);
+            isJumpButtonPressed = false;
+        }
     }
-
 }
